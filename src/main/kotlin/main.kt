@@ -3,6 +3,7 @@ import QueryType.*
 
 typealias Key = String
 typealias Value = String
+
 data class Element(val key: Key, val value: Value) {
     override fun toString(): String {
         return ("$key $value")
@@ -10,25 +11,11 @@ data class Element(val key: Key, val value: Value) {
 }
 typealias Database = MutableMap<Key, Value>
 
-/*
- * types of queries that the database should be able to perform
- * 1) one-operation:
- *    1.1) add value to database
- *    1.2) delete key
- *    1.3) get value from key
- * 2) multi-operation:
- *    2.1) series of queries "add"
- *    2.2) series of queries "get"
- *    2.3) series of queries "delete"
- * 3) extra:
- *    3.1) clear database
- */
 
-
-// reads all elements from file and writes them in database
-fun readFile(file: File) : Database {
-    val db : Database = mutableMapOf()
-    file.readLines().forEach() {
+// reads all the elements from file and writes them in database
+fun readFile(file: File): Database {
+    val db: Database = mutableMapOf()
+    file.readLines().forEach {
         val (key, value) = it.split(' ')
         db[key] = value
     }
@@ -38,14 +25,29 @@ fun readFile(file: File) : Database {
 // writes all the elements from database to file
 fun writeFile(file: File, db: Database) {
     file.writeText("")
-    db.forEach() {
+    db.forEach {
         file.appendText("${it.key} ${it.value}\n")
     }
 }
 
 
-// function parses arguments into elements with key and value
-fun parseArgs(args: Array<String>) : List<Element> {
+/*
+ * types of queries that the database should be able to perform
+ * 1) one-operation:
+ *    1.1) add value to database
+ *    1.2) delete key
+ *    1.3) get value from key
+ * 2) multi-operation:
+ *    2.1) series of queries "add"
+ *    2.2) series of queries "delete"
+ *    2.3) series of queries "get"
+ * 3) extra:
+ *    3.1) clear database
+ */
+
+
+// parses arguments into elements with key and value
+fun parseArgs(args: Array<String>): List<Element> {
     if (args.size % 2 == 1) {
         throw Exception("Invalid number of arguments")
     }
@@ -57,42 +59,52 @@ fun parseArgs(args: Array<String>) : List<Element> {
 }
 
 // adds one element to database
-fun addSingle(elem: Element, database: File) {
-    for (line in database.readLines()) {
-        val (key, _) = line.split(' ')
-        if (elem.key == key) {
-            throw Exception("Key ${elem.key} already exists in database")
-        }
+fun addSingle(elem: Element, database: Database) {
+    val (key, value) = elem
+    if (database.containsKey(key)) {
+        throw Exception("Invalid key: $key is already used")
     }
-    database.appendText(elem.toString())
-    database.appendText("\n")
+    database[key] = value
 }
 
 // adds elements to database
-fun add(args: Array<String>, database: File) {
+fun add(args: Array<String>, database: Database) {
     val elems = parseArgs(args)
-    for (elem in elems) { addSingle(elem, database) }
+    elems.forEach { addSingle(it, database) }
 }
 
 // deletes one element from database
-fun deleteSingle(targetKey: Key, database: File) {
-    TODO()
+fun deleteSingle(key: Key, database: Database) {
+    if (database.containsKey(key)) {
+        database.remove(key)
+    } else {
+        throw Exception("Key $key not found")
+    }
 }
 
 // deletes elements from database
-fun delete(args: Array<String>, database: File) {
+fun delete(args: Array<String>, database: Database) {
     val elems = parseArgs(args)
-    for (elem in elems) { deleteSingle(elem.key, database) }
+    elems.forEach { deleteSingle(it.key, database) }
+}
+
+// gets the value by its key
+fun getSingle(key: Key, database: Database) {
+    if (database.containsKey(key)) {
+        println(database[key])
+    } else {
+        throw Exception("Key $key not found")
+    }
 }
 
 // gets the values by their keys
-fun get(args: Array<String>, database: File) {
-    TODO()
+fun get(args: Array<String>, database: Database) {
+    args.forEach { getSingle(it, database) }
 }
 
 // deletes all the elements from database
-fun clear(database: File) {
-    database.writeText("")
+fun clear(database: Database) {
+    database.clear()
 }
 
 
@@ -112,19 +124,10 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
 
         return true
     }
-
     override fun hashCode(): Int {
         var result = queryType.hashCode()
         result = 31 * result + args.contentHashCode()
         return result
-    }
-
-    override fun toString(): String {
-        var s = "Query: ${queryType.toString()} \nArguments: "
-        for (arg in args) {
-            s += "$arg "
-        }
-        return s
     }
 }
 
@@ -146,26 +149,30 @@ fun getQuery(args: Array<String>): Query {
 }
 
 // function redirects the query to appropriate function
-fun produceQuery(query: Query, database: File) {
+fun produceQuery(query: Query, database: Database, file: File) {
     when (query.queryType) {
         Add -> add(query.args, database)
         Delete -> delete(query.args, database)
         Get -> get(query.args, database)
         Clear -> clear(database)
     }
+
+    when (query.queryType) {
+        Add, Delete, Clear -> writeFile(file, database)
+        Get -> {}
+    }
 }
 
 fun main(args: Array<String>) {
 
-    val database = File("src/data/database.txt")
+    // extracting file to database
+    val file = File("src/data/database.txt")
+    val database: Database = readFile(file)
 
     // processing input
     val query = getQuery(args)
 
     // producing the query
-    produceQuery(query, database)
+    produceQuery(query, database, file)
+
 }
-
-
-
-
