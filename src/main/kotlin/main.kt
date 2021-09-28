@@ -31,13 +31,30 @@ enum class QueryType(val str: String) {
     Create("create"), Add("add"), Get("get"), Delete("delete"), Clear("clear")
 }
 
-data class Query(val queryType: QueryType, val args: Array<String>)
+data class Query(val queryType: QueryType, val args: Array<String>) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Query
+
+        if (queryType != other.queryType) return false
+        if (!args.contentEquals(other.args)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = queryType.hashCode()
+        result = 31 * result + args.contentHashCode()
+        return result
+    }
+}
 
 // function checks the correctness of query type and returns the query
 fun getQuery(args: Array<String>): Query {
     if (args.isEmpty()) {
-        println("Empty query")
-        exitProcess(1)
+        throw Exception("Empty query")
     }
 
     val queryName = args[0]
@@ -46,14 +63,12 @@ fun getQuery(args: Array<String>): Query {
     for (queryType in QueryType.values()) {
         if (queryType.str == queryName) {
             if (queryArgs.isEmpty()) {
-                println("Query $queryName called with no arguments")
-                exitProcess(1)
+                throw Exception("Query $queryName called with no arguments")
             }
             return Query(queryType, queryArgs)
         }
     }
-    println("QueryType $queryName not found")
-    exitProcess(1)
+    throw Exception("QueryType $queryName not found")
 }
 
 fun main(args: Array<String>) {
