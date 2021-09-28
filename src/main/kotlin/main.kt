@@ -1,34 +1,74 @@
-import kotlin.system.exitProcess
+import java.io.File
+import QueryType.*
 
 typealias Key = String
 typealias Value = String
 
-data class Database(var db: MutableMap<Key, Value>) {
-
-}
+data class Database(val name: String, val file: File)
 
 
 /*
- * series of commands that the database should be able to perform
- * 1) head commands:
+ * types of queries that the database should be able to perform
+ * 1) head:
  *    1.1) create database
- *    1.2) open existing db
- *    1.3) delete db
- *    ? close db
- * 2) one-operation commands:
+ *    1.2) destroy database
+ *    ? open existing db
+ *    ? close current db
+ * 2) one-operation:
  *    2.1) add value to database
- *    2.3) get value from key
  *    2.2) delete key
- * 3) multi-operation commands:
- *    3.1) series of queries "add"
- *    3.2) series of queries "get"
- *    3.3) series of queries "delete"
- * 4) extra commands:
- *    4.1) clear database (delete all)
+ *    2.3) get value from key
+ * 3) multi-operation:
+ *    ? series of queries "add"
+ *    ? series of queries "get"
+ *    ? series of queries "delete"
+ * 4) extra:
+ *    ? clear database (delete all)
  */
 
+
+// creates an empty file which will store the elements of the database
+fun create(query: Query): Database {
+    if (query.args.size != 1) {
+        throw Exception("Invalid database name: ${query.args}")
+    }
+    val name = query.args[0]
+    val path = "../src/data/$name"
+    if (File(path).exists()) {
+        throw Exception("File $path already exists")
+    }
+    val file = File(path)
+    return Database(name, file)
+}
+
+// deletes the file storing database with all its elements
+fun destroy(query: Query) {
+    TODO()
+}
+
+// adds one element to the database
+fun add(query: Query) {
+    TODO()
+}
+
+// deletes one element from the database
+fun delete(query: Query) {
+    TODO()
+}
+
+// gets the element by the key
+fun get(query: Query) {
+    TODO()
+}
+
+// removes the element stores in the key
+fun remove(query: Query) {
+    TODO()
+}
+
+
 enum class QueryType(val str: String) {
-    Create("create"), Add("add"), Get("get"), Delete("delete"), Clear("clear")
+    Create("create"), Destroy("destroy"), Add("add"), Delete("delete"), Get("get"), Clear("clear")
 }
 
 data class Query(val queryType: QueryType, val args: Array<String>) {
@@ -49,6 +89,10 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
         result = 31 * result + args.contentHashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "Query: ${queryType.toString()} \n Arguments: $args"
+    }
 }
 
 // function checks the correctness of query type and returns the query
@@ -60,7 +104,7 @@ fun getQuery(args: Array<String>): Query {
     val queryName = args[0]
     val queryArgs = args.copyOfRange(1, args.size)
 
-    for (queryType in QueryType.values()) {
+    for (queryType in values()) {
         if (queryType.str == queryName) {
             if (queryArgs.isEmpty()) {
                 throw Exception("Query $queryName called with no arguments")
@@ -71,12 +115,26 @@ fun getQuery(args: Array<String>): Query {
     throw Exception("QueryType $queryName not found")
 }
 
+// function redirects the query to appropriate function
+fun produceQuery(query: Query) {
+    when (query.queryType) {
+        Create -> create(query)
+        Destroy -> destroy(query)
+        Add -> add(query)
+        Delete -> delete(query)
+        Get -> get(query)
+        Clear -> TODO()
+    }
+}
+
 fun main(args: Array<String>) {
 
     // processing input
     val query = getQuery(args)
-    println("Query: ${query.queryType}")
-    println("Arguments: ${query.args}")
+    println(query)
+
+    // producing the query
+    produceQuery(query)
 }
 
 
