@@ -3,8 +3,11 @@ import QueryType.*
 
 typealias Key = String
 typealias Value = String
-
-val database = File("../data/database")
+data class Element(val key: Key, val value: Value) {
+    override fun toString(): String {
+        return ("$key $value")
+    }
+}
 
 /*
  * types of queries that the database should be able to perform
@@ -22,22 +25,41 @@ val database = File("../data/database")
 
 
 // adds one element to database
-fun add(query: Query) {
+fun addSingle(elem: Element, database: File) {
+    for (line in database.readLines()) {
+        val (key, _) = line.split(' ')
+        if (elem.key == key) {
+            throw Exception("Key ${elem.key} already exists in database")
+        }
+    }
+    database.appendText(elem.toString())
+    database.appendText("\n")
+}
+
+// adds elements to database
+fun add(args: Array<String>, database: File) {
+    if (args.size % 2 == 1) {
+        throw Exception("Invalid arguments for add: $args")
+    }
+    // parsing arguments
+    for (ind in args.indices step 2) {
+        val elem = Element(args[ind], args[ind + 1])
+        addSingle(elem, database)
+    }
+}
+
+// deletes elements from database
+fun delete(args: Array<String>, database: File) {
     TODO()
 }
 
-// deletes one element from database
-fun delete(query: Query) {
-    TODO()
-}
-
-// gets the element by the key
-fun get(query: Query) {
+// gets the values by their keys
+fun get(args: Array<String>, database: File) {
     TODO()
 }
 
 // deletes all the elements from database
-fun clear(query: Query) {
+fun clear() {
     TODO()
 }
 
@@ -66,7 +88,11 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
     }
 
     override fun toString(): String {
-        return "Query: ${queryType.toString()} \n Arguments: $args"
+        var s = "Query: ${queryType.toString()} \nArguments: "
+        for (arg in args) {
+            s += "$arg "
+        }
+        return s
     }
 }
 
@@ -88,23 +114,24 @@ fun getQuery(args: Array<String>): Query {
 }
 
 // function redirects the query to appropriate function
-fun produceQuery(query: Query) {
+fun produceQuery(query: Query, database: File) {
     when (query.queryType) {
-        Add -> add(query)
-        Delete -> delete(query)
-        Get -> get(query)
+        Add -> add(query.args, database)
+        Delete -> delete(query.args, database)
+        Get -> get(query.args, database)
         Clear -> TODO()
     }
 }
 
 fun main(args: Array<String>) {
 
+    val database = File("src/data/database.txt")
+
     // processing input
     val query = getQuery(args)
-    println(query)
 
     // producing the query
-    produceQuery(query)
+    produceQuery(query, database)
 }
 
 
