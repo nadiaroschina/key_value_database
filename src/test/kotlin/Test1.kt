@@ -9,12 +9,14 @@ internal class Test1 {
         val expected1 = Query(QueryType.Add, arrayOf("key1", "value1"))
         assertEquals(expected1, getQuery(args1))
 
-        val args2 = arrayOf("create", "database1")
-        val expected2 = Query(QueryType.Create, arrayOf("database1"))
+        val args2 = arrayOf("clear")
+        val expected2 = Query(QueryType.Clear, emptyArray())
         assertEquals(expected2, getQuery(args2))
 
         assertThrows<Exception>  { getQuery(emptyArray()) }
-        assertThrows<Exception>  { getQuery(arrayOf("delete")) }
-        assertThrows<Exception>  { getQuery(arrayOf("edit key1")) }
+        assertThrows<Exception>  { getQuery(arrayOf("ruin")) }
+        assertThrows<Exception>  { getQuery(arrayOf("ruin elem")) }
+        assertThrows<Exception>  { getQuery(arrayOf("ruin elem1 elem2")) }
+
     }
 }

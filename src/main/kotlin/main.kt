@@ -4,54 +4,29 @@ import QueryType.*
 typealias Key = String
 typealias Value = String
 
-data class Database(val name: String, val file: File)
-
+val database = File("../data/database")
 
 /*
  * types of queries that the database should be able to perform
- * 1) head:
- *    1.1) create database
- *    1.2) destroy database
- *    ? open existing db
- *    ? close current db
- * 2) one-operation:
- *    2.1) add value to database
- *    2.2) delete key
- *    2.3) get value from key
- * 3) multi-operation:
- *    ? series of queries "add"
- *    ? series of queries "get"
- *    ? series of queries "delete"
- * 4) extra:
- *    ? clear database (delete all)
+ * 1) one-operation:
+ *    1.1) add value to database
+ *    1.2) delete key
+ *    1.3) get value from key
+ * 2) multi-operation:
+ *    2.1) series of queries "add"
+ *    2.2) series of queries "get"
+ *    2.3) series of queries "delete"
+ * 3) extra:
+ *    3.1) clear database
  */
 
 
-// creates an empty file which will store the elements of the database
-fun create(query: Query): Database {
-    if (query.args.size != 1) {
-        throw Exception("Invalid database name: ${query.args}")
-    }
-    val name = query.args[0]
-    val path = "../src/data/$name"
-    if (File(path).exists()) {
-        throw Exception("File $path already exists")
-    }
-    val file = File(path)
-    return Database(name, file)
-}
-
-// deletes the file storing database with all its elements
-fun destroy(query: Query) {
-    TODO()
-}
-
-// adds one element to the database
+// adds one element to database
 fun add(query: Query) {
     TODO()
 }
 
-// deletes one element from the database
+// deletes one element from database
 fun delete(query: Query) {
     TODO()
 }
@@ -61,14 +36,14 @@ fun get(query: Query) {
     TODO()
 }
 
-// removes the element stores in the key
-fun remove(query: Query) {
+// deletes all the elements from database
+fun clear(query: Query) {
     TODO()
 }
 
 
 enum class QueryType(val str: String) {
-    Create("create"), Destroy("destroy"), Add("add"), Delete("delete"), Get("get"), Clear("clear")
+    Add("add"), Delete("delete"), Get("get"), Clear("clear")
 }
 
 data class Query(val queryType: QueryType, val args: Array<String>) {
@@ -106,9 +81,6 @@ fun getQuery(args: Array<String>): Query {
 
     for (queryType in values()) {
         if (queryType.str == queryName) {
-            if (queryArgs.isEmpty()) {
-                throw Exception("Query $queryName called with no arguments")
-            }
             return Query(queryType, queryArgs)
         }
     }
@@ -118,8 +90,6 @@ fun getQuery(args: Array<String>): Query {
 // function redirects the query to appropriate function
 fun produceQuery(query: Query) {
     when (query.queryType) {
-        Create -> create(query)
-        Destroy -> destroy(query)
         Add -> add(query)
         Delete -> delete(query)
         Get -> get(query)
