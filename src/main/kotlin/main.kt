@@ -8,6 +8,7 @@ data class Element(val key: Key, val value: Value) {
         return ("$key $value")
     }
 }
+typealias Database = MutableMap<Key, Value>
 
 /*
  * types of queries that the database should be able to perform
@@ -24,6 +25,37 @@ data class Element(val key: Key, val value: Value) {
  */
 
 
+// reads all elements from file and writes them in database
+fun readFile(file: File) : Database {
+    val db : Database = mutableMapOf()
+    file.readLines().forEach() {
+        val (key, value) = it.split(' ')
+        db[key] = value
+    }
+    return db
+}
+
+// writes all the elements from database to file
+fun writeFile(file: File, db: Database) {
+    file.writeText("")
+    db.forEach() {
+        file.appendText("${it.key} ${it.value}\n")
+    }
+}
+
+
+// function parses arguments into elements with key and value
+fun parseArgs(args: Array<String>) : List<Element> {
+    if (args.size % 2 == 1) {
+        throw Exception("Invalid number of arguments")
+    }
+    val elements = mutableListOf<Element>()
+    for (ind in args.indices step 2) {
+        elements.add(Element(args[ind], args[ind + 1]))
+    }
+    return elements
+}
+
 // adds one element to database
 fun addSingle(elem: Element, database: File) {
     for (line in database.readLines()) {
@@ -38,19 +70,19 @@ fun addSingle(elem: Element, database: File) {
 
 // adds elements to database
 fun add(args: Array<String>, database: File) {
-    if (args.size % 2 == 1) {
-        throw Exception("Invalid arguments for add: $args")
-    }
-    // parsing arguments
-    for (ind in args.indices step 2) {
-        val elem = Element(args[ind], args[ind + 1])
-        addSingle(elem, database)
-    }
+    val elems = parseArgs(args)
+    for (elem in elems) { addSingle(elem, database) }
+}
+
+// deletes one element from database
+fun deleteSingle(targetKey: Key, database: File) {
+    TODO()
 }
 
 // deletes elements from database
 fun delete(args: Array<String>, database: File) {
-    TODO()
+    val elems = parseArgs(args)
+    for (elem in elems) { deleteSingle(elem.key, database) }
 }
 
 // gets the values by their keys
@@ -59,8 +91,8 @@ fun get(args: Array<String>, database: File) {
 }
 
 // deletes all the elements from database
-fun clear() {
-    TODO()
+fun clear(database: File) {
+    database.writeText("")
 }
 
 
@@ -119,7 +151,7 @@ fun produceQuery(query: Query, database: File) {
         Add -> add(query.args, database)
         Delete -> delete(query.args, database)
         Get -> get(query.args, database)
-        Clear -> TODO()
+        Clear -> clear(database)
     }
 }
 
