@@ -89,9 +89,9 @@ fun delete(args: Array<String>, database: Database) {
 }
 
 // gets the value by its key
-fun getSingle(key: Key, database: Database) {
+fun getSingle(key: Key, database: Database): Value {
     if (database.containsKey(key)) {
-        println(database[key])
+        return database[key]!!
     } else {
         throw Exception("Key $key not found")
     }
@@ -154,7 +154,10 @@ fun produceQuery(query: Query, database: Database, file: File) {
     when (query.queryType) {
         Add -> add(query.args, database)
         Delete -> delete(query.args, database)
-        Get -> get(query.args, database)
+        Get -> {
+            val value = get(query.args, database)
+            println(value)
+        }
         Clear -> clear(database)
     }
 

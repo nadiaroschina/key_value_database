@@ -42,11 +42,11 @@ internal class SmallTestsDatabase {
     fun testAddSingle() {
         val db = mutableMapOf<Key, Value>()
         val elem1 = Element("key1", "value1")
-        val elem1_copy = Element("key1", "value1_copy")
+        val elem1Copy = Element("key1", "value1Copy")
         val elem2 = Element("key2", "value2")
         addSingle(elem1, db)
         assertContains(db, elem1.key)
-        assertThrows<Exception> { addSingle(elem1_copy, db) }
+        assertThrows<Exception> { addSingle(elem1Copy, db) }
         addSingle(elem2, db)
         assertContains(db, elem1.key)
         assertContains(db, elem2.key)
@@ -54,12 +54,27 @@ internal class SmallTestsDatabase {
 
     @Test
     fun testDeleteSingle() {
-        TODO()
+        val db = mutableMapOf<Key, Value>("key1" to "val1", "key2" to "val2")
+        val key1 = "key1"
+        val key2 = "key2"
+        val key3 = "key3"
+        deleteSingle(key1, db)
+        assertTrue { !db.containsKey(key1) }
+        assertTrue { db.containsKey(key2) }
+        assertThrows<Exception> { deleteSingle(key3, db) }
     }
 
     @Test
     fun testGetSingle() {
-        TODO()
+        val db = mutableMapOf<Key, Value>("key1" to "val1", "key2" to "val2")
+        val dbCopy = db.toMutableMap()
+        val elem1 = Element("key1", "val1")
+        val elem2 = Element("key2", "val2")
+        val elem3 = Element("key3", "val3")
+        assertEquals(elem1.value, getSingle(elem1.key, db))
+        assertEquals(elem2.value, getSingle(elem2.key, db))
+        assertThrows<Exception> { getSingle(elem3.key, db) }
+        assertEquals(db, dbCopy)
     }
 
 }
