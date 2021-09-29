@@ -124,6 +124,7 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
 
         return true
     }
+
     override fun hashCode(): Int {
         var result = queryType.hashCode()
         result = 31 * result + args.contentHashCode()
@@ -159,7 +160,8 @@ fun produceQuery(query: Query, database: Database, file: File) {
 
     when (query.queryType) {
         Add, Delete, Clear -> writeFile(file, database)
-        Get -> {}
+        Get -> {
+        }
     }
 }
 
