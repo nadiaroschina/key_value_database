@@ -1,5 +1,8 @@
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 internal class TestQuery {
 
@@ -84,15 +87,43 @@ internal class BigTestsDatabase {
 
     @Test
     fun testAdd() {
-        TODO()
+        val size = 1000000
+        val keys = List<Key> (size) { it.toString() }
+        val values = List<Value> (size) { it.toString() }
+        val args = Array<String> (2 * size) { (it / 2).toString() }
+        val db = mutableMapOf<Key, Value>()
+        add(args, db)
+        val expected = (keys.zip(values)).toMap()
+        assertEquals(expected, db)
     }
 
+    @Test
     fun testDelete() {
-        TODO()
+        val size = 1000000
+        val args = Array<String> (4 * size) { (it / 2).toString() }
+        val db = mutableMapOf<Key, Value>()
+        add(args, db)
+
+        val args1 = Array<String> (2 * size) { (it / 2).toString()}
+        delete(args1, db)
+
+        val keys2 = List<Key> (size) { (size + it).toString() }
+        val values2 = List<Value> (size) { (size + it).toString() }
+        val expected = (keys2.zip(values2)).toMap()
+        assertEquals(expected, db)
     }
 
+    @Test
     fun testGet() {
-        TODO()
+        val size = 10
+        val args = Array<String> (2 * size) { (it / 2).toString() }
+        val db = mutableMapOf<Key, Value>()
+        add(args, db)
+
+        val keys = List<Key> (size) { (it).toString() }.toTypedArray()
+        val values = List<Value> (size) { (it).toString() }.toTypedArray()
+
+        assertEquals(values.toList(), get(keys, db).toList())
     }
 
 }

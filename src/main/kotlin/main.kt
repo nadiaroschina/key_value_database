@@ -98,8 +98,10 @@ fun getSingle(key: Key, database: Database): Value {
 }
 
 // gets the values by their keys
-fun get(args: Array<String>, database: Database) {
-    args.forEach { getSingle(it, database) }
+fun get(args: Array<String>, database: Database) : Array<Value> {
+    val res = mutableListOf<Value>()
+    args.forEach { res.add(getSingle(it, database)) }
+    return res.toTypedArray()
 }
 
 // deletes all the elements from database
@@ -155,8 +157,8 @@ fun produceQuery(query: Query, database: Database, file: File) {
         Add -> add(query.args, database)
         Delete -> delete(query.args, database)
         Get -> {
-            val value = get(query.args, database)
-            println(value)
+            val values = get(query.args, database)
+            println(values.joinToString("\n"))
         }
         Clear -> clear(database)
     }
