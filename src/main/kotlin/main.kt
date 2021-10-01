@@ -1,5 +1,6 @@
-import java.io.File
 import QueryType.*
+import java.io.File
+
 
 typealias Key = String
 typealias Value = String
@@ -9,10 +10,29 @@ data class Element(val key: Key, val value: Value) {
         return ("$key $value")
     }
 }
-typealias Database = MutableMap<Key, Value>
+
+// binary hash
+fun binHash(str: String): String {
+    return (kotlin.math.abs(str.hashCode())).toString(2)
+}
+
+// returns the directory that should contain given key
+fun getFullPath(head: File, key: Key): String {
+    val hash = binHash(key)
+    val builder = StringBuilder()
+    builder.append(head.path)
+    builder.append('\\')
+    hash.forEach {
+        builder.append(it)
+        builder.append('\\')
+    }
+    return builder.toString()
+}
 
 
-// reads all the elements from file and writes them in database
+/*
+out-of-date functions
+reads all the elements from file and writes them in database
 fun readFile(file: File): Database {
     val db: Database = mutableMapOf()
     file.readLines().forEach {
@@ -22,14 +42,14 @@ fun readFile(file: File): Database {
     return db
 }
 
-// writes all the elements from database to file
+writes all the elements from database to file
 fun writeFile(file: File, db: Database) {
     file.writeText("")
     db.forEach {
         file.appendText("${it.key} ${it.value}\n")
     }
 }
-
+*/
 
 /*
  * types of queries that the database should be able to perform
@@ -59,54 +79,64 @@ fun parseArgs(args: Array<String>): List<Element> {
 }
 
 // adds one element to database
-fun addSingle(elem: Element, database: Database) {
+fun addSingle(elem: Element, head: File) {
+
     val (key, value) = elem
-    if (database.containsKey(key)) {
-        throw Exception("Invalid key: $key is already used")
+
+    val path = getFullPath(head, key)
+    val dir = File(path)
+
+    dir.mkdirs()
+
+    val file = File(dir, key)
+    if (file.exists()) {
+        val oldValue = file.readText()
+        if (oldValue == value) {
+            println("Key $key already stores this value.")
+        } else {
+            file.writeText(value)
+            println("Key $key changed its value to $value. Old value was $oldValue.")
+        }
+    } else {
+        file.createNewFile()
+        file.writeText(elem.value)
+        println("Key ${elem.key} now has the value ${elem.value}.")
     }
-    database[key] = value
+
 }
 
 // adds elements to database
-fun add(args: Array<String>, database: Database) {
+fun add(args: Array<String>) {
     val elems = parseArgs(args)
-    elems.forEach { addSingle(it, database) }
+    //elems.forEach { addSingle(it) }
 }
 
 // deletes one element from database
-fun deleteSingle(key: Key, database: Database) {
-    if (database.containsKey(key)) {
-        database.remove(key)
-    } else {
-        throw Exception("Key $key not found")
-    }
+fun deleteSingle(key: Key) {
+    TODO()
 }
 
 // deletes elements from database
-fun delete(args: Array<String>, database: Database) {
+fun delete(args: Array<String>) {
     val elems = parseArgs(args)
-    elems.forEach { deleteSingle(it.key, database) }
+    //elems.forEach { deleteSingle(it.key) }
 }
 
 // gets the value by its key
-fun getSingle(key: Key, database: Database): Value {
-    if (database.containsKey(key)) {
-        return database[key]!!
-    } else {
-        throw Exception("Key $key not found")
-    }
+fun getSingle(key: Key): Value {
+    TODO()
 }
 
 // gets the values by their keys
-fun get(args: Array<String>, database: Database) : Array<Value> {
+fun get(args: Array<String>): Array<Value> {
     val res = mutableListOf<Value>()
-    args.forEach { res.add(getSingle(it, database)) }
+    //args.forEach { res.add(getSingle(it)) }
     return res.toTypedArray()
 }
 
 // deletes all the elements from database
-fun clear(database: Database) {
-    database.clear()
+fun clear(head: File) {
+    head.deleteRecursively()
 }
 
 
@@ -135,7 +165,7 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
 }
 
 // function checks the correctness of query type and returns the query
-fun getQuery(args: Array<String>): Query {
+fun getQuery(args: Array<String>, head: File): Query {
     if (args.isEmpty()) {
         throw Exception("Empty query")
     }
@@ -152,34 +182,24 @@ fun getQuery(args: Array<String>): Query {
 }
 
 // function redirects the query to appropriate function
-fun produceQuery(query: Query, database: Database, file: File) {
-    when (query.queryType) {
-        Add -> add(query.args, database)
-        Delete -> delete(query.args, database)
-        Get -> {
-            val values = get(query.args, database)
-            println(values.joinToString("\n"))
-        }
-        Clear -> clear(database)
-    }
-
-    when (query.queryType) {
-        Add, Delete, Clear -> writeFile(file, database)
-        Get -> {
-        }
-    }
+fun produceQuery() {
+    TODO()
 }
 
 fun main(args: Array<String>) {
 
-    // extracting file to database
-    val file = File("src/data/database.txt")
-    val database: Database = readFile(file)
+    // opening head directory
+    val head = File("src/data/")
+    head.mkdirs() // creating directory if it doesn't exist
+
+    addSingle(Element("a", "a"), head)
+    clear(head)
+    addSingle(Element("b", "b"), head)
 
     // processing input
-    val query = getQuery(args)
+    // val query = getQuery(args)
 
     // producing the query
-    produceQuery(query, database, file)
+    // produceQuery(query, head)
 
 }
