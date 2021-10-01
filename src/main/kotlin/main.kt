@@ -140,14 +140,22 @@ fun delete(args: Array<String>, head: File) {
 }
 
 // gets the value by its key
-fun getSingle(key: Key): Value {
-    TODO()
+fun getSingle(key: Key, head: File): Value? {
+    val dirPath = getFullDir(head, key)
+    val file = File(dirPath, key)
+    return if (file.exists()) {
+        file.readText()
+    }
+    else {
+        println("key $key not found in database")
+        null
+    }
 }
 
 // gets the values by their keys
-fun get(args: Array<String>): Array<Value> {
-    val res = mutableListOf<Value>()
-    //args.forEach { res.add(getSingle(it)) }
+fun get(args: Array<String>, head: File): Array<Value?> {
+    val res = mutableListOf<Value?>()
+    args.forEach { res.add(getSingle(it, head)) }
     return res.toTypedArray()
 }
 
@@ -209,7 +217,9 @@ fun main(args: Array<String>) {
     val head = File("src/data/")
     head.mkdirs() // creating directory if it doesn't exist
 
-    deleteSingle("c", head)
+    add(arrayOf("A", "a", "B", "b", "C", "c"), head)
+    val res = get(arrayOf("A", "X", "C"), head)
+
 
     // processing input
     // val query = getQuery(args)
