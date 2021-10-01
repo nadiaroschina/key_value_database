@@ -7,17 +7,17 @@ typealias Value = String
 
 data class Element(val key: Key, val value: Value) {
     override fun toString(): String {
-        return ("$key $value")
+        return ("<$key, $value>")
     }
 }
 
-// binary hash
+// binary hash. returns the same binary string
 fun binHash(str: String): String {
     return (kotlin.math.abs(str.hashCode())).toString(2)
 }
 
 // returns the directory that should contain given key
-fun getFullPath(head: File, key: Key): String {
+fun getFullDir(head: File, key: Key): String {
     val hash = binHash(key)
     val builder = StringBuilder()
     builder.append(head.path)
@@ -83,8 +83,7 @@ fun addSingle(elem: Element, head: File) {
 
     val (key, value) = elem
 
-    val path = getFullPath(head, key)
-    val dir = File(path)
+    val dir = File(getFullDir(head, key))
 
     dir.mkdirs()
 
@@ -106,20 +105,38 @@ fun addSingle(elem: Element, head: File) {
 }
 
 // adds elements to database
-fun add(args: Array<String>) {
+fun add(args: Array<String>, head: File) {
     val elems = parseArgs(args)
-    //elems.forEach { addSingle(it) }
+    elems.forEach { addSingle(it, head) }
 }
 
 // deletes one element from database
-fun deleteSingle(key: Key) {
-    TODO()
+fun deleteSingle(key: Key, head: File) {
+
+    val dirPath = getFullDir(head, key)
+    var file = File(dirPath, key)
+
+    if (file.exists()) {
+        println("file exists")
+        val value = file.readText()
+        file.delete()
+        // deleting empty head directories
+        while (!file.parentFile.path.endsWith("data") && file.parentFile.length() == 0L) {
+            file = file.parentFile
+            file.delete()
+        }
+        println("Key $key deleted; its value was $value.")
+    }
+    else {
+        println("Key $key not found in database.")
+    }
+
 }
 
 // deletes elements from database
-fun delete(args: Array<String>) {
+fun delete(args: Array<String>, head: File) {
     val elems = parseArgs(args)
-    //elems.forEach { deleteSingle(it.key) }
+    elems.forEach { deleteSingle(it.key, head) }
 }
 
 // gets the value by its key
@@ -192,9 +209,7 @@ fun main(args: Array<String>) {
     val head = File("src/data/")
     head.mkdirs() // creating directory if it doesn't exist
 
-    addSingle(Element("a", "a"), head)
-    clear(head)
-    addSingle(Element("b", "b"), head)
+    deleteSingle("c", head)
 
     // processing input
     // val query = getQuery(args)
