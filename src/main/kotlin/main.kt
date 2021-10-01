@@ -1,5 +1,6 @@
 import QueryType.*
 import java.io.File
+import java.lang.IllegalArgumentException
 
 
 typealias Key = String
@@ -31,27 +32,6 @@ fun getFullDir(head: File, key: Key): String {
 
 
 /*
-out-of-date functions
-reads all the elements from file and writes them in database
-fun readFile(file: File): Database {
-    val db: Database = mutableMapOf()
-    file.readLines().forEach {
-        val (key, value) = it.split(' ')
-        db[key] = value
-    }
-    return db
-}
-
-writes all the elements from database to file
-fun writeFile(file: File, db: Database) {
-    file.writeText("")
-    db.forEach {
-        file.appendText("${it.key} ${it.value}\n")
-    }
-}
-*/
-
-/*
  * types of queries that the database should be able to perform
  * 1) one-operation:
  *    1.1) add value to database
@@ -69,7 +49,7 @@ fun writeFile(file: File, db: Database) {
 // parses arguments into elements with key and value
 fun parseArgs(args: Array<String>): List<Element> {
     if (args.size % 2 == 1) {
-        throw Exception("Invalid number of arguments")
+        throw IllegalArgumentException("Invalid number of arguments")
     }
     val elements = mutableListOf<Element>()
     for (ind in args.indices step 2) {
@@ -91,7 +71,7 @@ fun addSingle(elem: Element, head: File) {
     if (file.exists()) {
         val oldValue = file.readText()
         if (oldValue == value) {
-            println("Key $key already stores this value.")
+            println("Key $key already stores value $value.")
         } else {
             file.writeText(value)
             println("Key $key changed its value to $value. Old value was $oldValue.")
@@ -190,7 +170,7 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
 }
 
 // function checks the correctness of query type and returns the query
-fun getQuery(args: Array<String>, head: File): Query {
+fun getQuery(args: Array<String>): Query {
     if (args.isEmpty()) {
         throw Exception("Empty query")
     }
@@ -203,12 +183,20 @@ fun getQuery(args: Array<String>, head: File): Query {
             return Query(queryType, queryArgs)
         }
     }
-    throw Exception("QueryType $queryName not found")
+    throw IllegalArgumentException("QueryType $queryName not found")
 }
 
 // function redirects the query to appropriate function
-fun produceQuery() {
-    TODO()
+fun produceQuery(query: Query, head: File) {
+    when (query.queryType) {
+        Add -> add(query.args, head)
+        Delete -> delete(query.args, head)
+        Get -> {
+            val values = get(query.args, head)
+            println(values.joinToString("\n"))
+        }
+        Clear -> clear(head)
+    }
 }
 
 fun main(args: Array<String>) {
@@ -217,14 +205,10 @@ fun main(args: Array<String>) {
     val head = File("src/data/")
     head.mkdirs() // creating directory if it doesn't exist
 
-    add(arrayOf("A", "a", "B", "b", "C", "c"), head)
-    val res = get(arrayOf("A", "X", "C"), head)
-
-
     // processing input
-    // val query = getQuery(args)
+    val query = getQuery(args)
 
     // producing the query
-    // produceQuery(query, head)
+    produceQuery(query, head)
 
 }
