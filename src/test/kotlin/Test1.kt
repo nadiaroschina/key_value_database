@@ -1,4 +1,3 @@
-
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.io.File
@@ -16,7 +15,7 @@ internal class InternalFunctionsTest {
         val expected2 = Query(QueryType.Clear, emptyArray())
         assertEquals(expected2, getQuery(args2))
 
-        assertThrows<Exception> { getQuery(emptyArray()) }
+        assertThrows<IllegalArgumentException> { getQuery(emptyArray()) }
         assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin")) }
         assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin elem")) }
         assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin elem1 elem2")) }
@@ -57,11 +56,11 @@ internal class InternalFunctionsTest {
 
         val dirmilk1 = getFullDir(head, "milk")
         val dirmilk2 = getFullDir(head, "milk")
-        assertTrue { dirmilk1.startsWith("src\\test\\testdata") }
-        assertTrue { dirmilk1.endsWith("\\") }
+        println(dirmilk1)
+        assertTrue { dirmilk1.startsWith("src\\test\\testdata") or dirmilk1.startsWith("src/test/testdata") }
 
         val dirMilk = getFullDir(head, "Milk")
-        assertEquals (dirmilk1, dirmilk2)
+        assertEquals(dirmilk1, dirmilk2)
         assertNotEquals(dirmilk1, dirMilk)
 
         assertDoesNotThrow {
@@ -73,3 +72,12 @@ internal class InternalFunctionsTest {
     }
 }
 
+// checking correctness
+internal class SmallTestsDatabase {
+    // TODO
+}
+
+// checking effectiveness
+internal class BigTestsDatabase {
+    // TODO
+}

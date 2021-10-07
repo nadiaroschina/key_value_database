@@ -1,6 +1,6 @@
+
 import QueryType.*
 import java.io.File
-import java.lang.IllegalArgumentException
 
 
 typealias Key = String
@@ -18,16 +18,15 @@ fun binHash(str: String): String {
 }
 
 // returns the directory that should contain given key
-fun getFullDir(head: File, key: Key): String {
+fun getFullDir(headDir: File, key: Key): String {
     val hash = binHash(key)
-    val builder = StringBuilder()
-    builder.append(head.path)
-    builder.append('\\')
+    var currDir = headDir
     hash.forEach {
-        builder.append(it)
-        builder.append('\\')
+        val childDir = File(currDir, it.toString())
+        childDir.mkdirs()
+        currDir = childDir
     }
-    return builder.toString()
+    return currDir.path
 }
 
 
@@ -125,9 +124,7 @@ fun getSingle(key: Key, head: File): Value? {
     val file = File(dirPath, key)
     return if (file.exists()) {
         file.readText()
-    }
-    else {
-        println("key $key not found in database")
+    } else {
         null
     }
 }
@@ -161,18 +158,13 @@ data class Query(val queryType: QueryType, val args: Array<String>) {
 
         return true
     }
-
-    override fun hashCode(): Int {
-        var result = queryType.hashCode()
-        result = 31 * result + args.contentHashCode()
-        return result
-    }
 }
 
 // function checks the correctness of query type and returns the query
 fun getQuery(args: Array<String>): Query {
     if (args.isEmpty()) {
-        throw Exception("Empty query")
+        // TODO remove exception throw
+        throw IllegalArgumentException("Empty query")
     }
 
     val queryName = args[0]
@@ -183,7 +175,8 @@ fun getQuery(args: Array<String>): Query {
             return Query(queryType, queryArgs)
         }
     }
-    throw IllegalArgumentException("QueryType $queryName not found")
+    // TODO remove exception throw
+    throw IllegalArgumentException("Unsupported query: $queryName")
 }
 
 // function redirects the query to appropriate function
