@@ -46,7 +46,7 @@ fun getFullDir(headDir: File, key: Key): String {
 
 
 // parses arguments into elements with key and value
-fun parseArgs(args: Array<String>): List<Element> {
+fun parseArgs(args: List<String>): List<Element> {
     if (args.size % 2 == 1) {
         throw IllegalArgumentException("Invalid number of arguments")
     }
@@ -84,7 +84,7 @@ fun addSingle(elem: Element, head: File) {
 }
 
 // adds elements to database
-fun add(args: Array<String>, head: File) {
+fun add(args: List<String>, head: File) {
     val elems = parseArgs(args)
     elems.forEach { addSingle(it, head) }
 }
@@ -113,9 +113,8 @@ fun deleteSingle(key: Key, head: File) {
 }
 
 // deletes elements from database
-fun delete(args: Array<String>, head: File) {
-    val elems = parseArgs(args)
-    elems.forEach { deleteSingle(it.key, head) }
+fun delete(args: List<String>, head: File) {
+    args.forEach { deleteSingle(it, head) }
 }
 
 // gets the value by its key
@@ -130,10 +129,10 @@ fun getSingle(key: Key, head: File): Value? {
 }
 
 // gets the values by their keys
-fun get(args: Array<String>, head: File): Array<Value?> {
+fun get(args: List<String>, head: File): List<Value?> {
     val res = mutableListOf<Value?>()
     args.forEach { res.add(getSingle(it, head)) }
-    return res.toTypedArray()
+    return res.toList()
 }
 
 // deletes all the elements from database
@@ -146,19 +145,7 @@ enum class QueryType(val str: String) {
     Add("add"), Delete("delete"), Get("get"), Clear("clear")
 }
 
-data class Query(val queryType: QueryType, val args: Array<String>) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Query
-
-        if (queryType != other.queryType) return false
-        if (!args.contentEquals(other.args)) return false
-
-        return true
-    }
-}
+data class Query(val queryType: QueryType, val args: List<String>)
 
 // function checks the correctness of query type and returns the query
 fun getQuery(args: Array<String>): Query {
@@ -168,7 +155,7 @@ fun getQuery(args: Array<String>): Query {
     }
 
     val queryName = args[0]
-    val queryArgs = args.copyOfRange(1, args.size)
+    val queryArgs = (args.copyOfRange(1, args.size)).toList()
 
     for (queryType in values()) {
         if (queryType.str == queryName) {
