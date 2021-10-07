@@ -8,11 +8,11 @@ internal class InternalFunctionsTest {
     @Test
     fun testGetQuery() {
         val args1 = arrayOf("add", "key1", "value1")
-        val expected1 = Query(QueryType.Add, arrayOf("key1", "value1"))
+        val expected1 = Query(QueryType.Add, listOf("key1", "value1"))
         assertEquals(expected1, getQuery(args1))
 
         val args2 = arrayOf("clear")
-        val expected2 = Query(QueryType.Clear, emptyArray())
+        val expected2 = Query(QueryType.Clear, emptyList())
         assertEquals(expected2, getQuery(args2))
 
         assertThrows<IllegalArgumentException> { getQuery(emptyArray()) }
@@ -41,10 +41,10 @@ internal class InternalFunctionsTest {
 
     @Test
     fun testParseArgs() {
-        val args1 = arrayOf("1", "2", "3", "4", "5")
+        val args1 = listOf("1", "2", "3", "4", "5")
         assertThrows<IllegalArgumentException> { parseArgs(args1) }
 
-        val args2 = arrayOf("a", "b", "c", "d", "e", "f")
+        val args2 = listOf("a", "b", "c", "d", "e", "f")
         val expected = listOf(Element("a", "b"), Element("c", "d"), Element("e", "f"))
         assertEquals(parseArgs(args2), expected)
     }
