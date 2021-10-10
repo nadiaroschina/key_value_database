@@ -167,5 +167,68 @@ internal class SmallTestsDatabase {
 
 // checking effectiveness
 internal class BigTestsDatabase {
-    // TODO
+    @Test
+    // around 10 sec
+    fun testAdd() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val elemList1 = List(1000) { "a${it / 2}" }
+        val keys1 = List(500) { "a$it" }
+        val elemList2 = List(2000) { "b${it / 2}" }
+        val keys2 = List(1000) { "b$it" }
+
+        add(elemList1, head)
+        assertEquals(get(keys1, head), keys1)
+
+        add(elemList1, head)
+        assertEquals(get(keys1, head), keys1)
+
+        add(elemList2, head)
+        assertEquals(get(keys1, head), keys1)
+        assertEquals(get(keys2, head), keys2)
+
+        head.deleteRecursively()
+    }
+
+    @Test
+    // around 25 sec
+    fun testDelete() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val elemList1 = List(1000) { "a${it / 2}" }
+        val keys1 = List(500) { "a$it" }
+        val elemList2 = List(2000) { "b${it / 2}" }
+        val keys2 = List(1000) { "b$it" }
+
+        delete(keys1, head)
+        assertEquals(get(keys1, head), List(500) { null })
+
+        add(elemList1, head)
+        delete(keys1, head)
+        add(elemList2, head)
+        assertEquals(get(keys1, head), List(500) { null })
+        assertEquals(get(keys2, head), keys2)
+
+        delete(keys2, head)
+        assertEquals(get(keys2, head), List(1000) { null })
+
+        head.deleteRecursively()
+    }
+
+    @Test
+    // around 20 sec
+    fun bigTest() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val elemList = List(2000) { "${it / 2}" }
+        val keys = List(1000) { "$it" }
+
+        add(elemList, head)
+        delete(keys, head)
+
+        head.deleteRecursively()
+    }
 }
