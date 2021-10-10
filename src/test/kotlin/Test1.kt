@@ -82,6 +82,10 @@ internal class SmallTestsDatabase {
         val cake = Element("cake", "flour,eggs,milk")
         val cake2 = Element("cake", "flour,sugar,cream")
         val soup = Element("soup", "water,meat,potatoes")
+        val smoothie = Element("smoo/thie", "apples,bananas,celery")
+
+        addSingle(smoothie, head)
+        assertEquals(getSingle("smoo/thie", head), null)
 
         addSingle(cake, head)
         assertEquals(getSingle("cake", head), "flour,eggs,milk")

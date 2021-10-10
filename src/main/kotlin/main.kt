@@ -124,8 +124,8 @@ fun deleteSingle(key: Key, head: File) {
 }
 
 // deletes elements from database
-fun delete(args: List<String>, head: File) {
-    args.forEach { deleteSingle(it, head) }
+fun delete(keys: List<Key>, head: File) {
+    keys.forEach { deleteSingle(it, head) }
 }
 
 // gets the value by its key
