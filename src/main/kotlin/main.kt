@@ -1,4 +1,3 @@
-
 import QueryType.*
 import java.io.File
 
@@ -29,6 +28,10 @@ fun getFullDir(headDir: File, key: Key): String {
     return currDir.path
 }
 
+// checks that the key doesn't contain '/' or '\' symbols
+fun checkKey(key: Key): Boolean {
+    return !(key.contains("/") || key.contains("\\"))
+}
 
 /*
  * types of queries that the database should be able to perform
@@ -62,56 +65,62 @@ fun addSingle(elem: Element, head: File) {
 
     val (key, value) = elem
 
-    // to avoid file names such as "0" or "1"
-    val filename = "key_$key"
-
-    val dir = File(getFullDir(head, key))
-    dir.mkdirs()
-
-    val file = File(dir, filename)
-    if (file.exists()) {
-        val oldValue = file.readText()
-        if (oldValue == value) {
-            println("Key $key already stores value $value")
-        } else {
-            file.writeText(value)
-            println("Key $key changed its value to $value. Old value was $oldValue")
-        }
+    if (!checkKey(key)) {
+        println("Key $key is invalid")
     } else {
-        file.createNewFile()
-        file.writeText(elem.value)
-        println("Key ${elem.key} now has the value ${elem.value}")
-    }
+        // to avoid file names such as "0" or "1"
+        val filename = "key_$key"
 
+        val dir = File(getFullDir(head, key))
+        dir.mkdirs()
+
+        val file = File(dir, filename)
+        if (file.exists()) {
+            val oldValue = file.readText()
+            if (oldValue == value) {
+                println("Key $key already stores value $value")
+            } else {
+                file.writeText(value)
+                println("Key $key changed its value to $value. Old value was $oldValue")
+            }
+        } else {
+            file.createNewFile()
+            file.writeText(elem.value)
+            println("Key ${elem.key} now has the value ${elem.value}")
+        }
+
+    }
 }
 
 // adds elements to database
-fun add(args: List<String>, head: File) {
-    val elems = parseArgs(args)
+fun add(elems: List<Element>, head: File) {
     elems.forEach { addSingle(it, head) }
 }
 
 // deletes one element from database
 fun deleteSingle(key: Key, head: File) {
 
-    val dirPath = getFullDir(head, key)
-    val filename = "key_$key"
-    var file = File(dirPath, filename)
+    if (!checkKey(key)) {
+        println("Key $key is invalid")
+    } else {
 
-    if (file.exists()) {
-        val value = file.readText()
-        file.delete()
-        // deleting empty head directories
-        while (!file.parentFile.path.endsWith("data") && file.parentFile.length() == 0L) {
-            file = file.parentFile
+        val dirPath = getFullDir(head, key)
+        val filename = "key_$key"
+        var file = File(dirPath, filename)
+
+        if (file.exists()) {
+            val value = file.readText()
             file.delete()
+            // deleting empty head directories
+            while (!file.parentFile.path.endsWith("data") && file.parentFile.length() == 0L) {
+                file = file.parentFile
+                file.delete()
+            }
+            println("Key $key deleted; its value was $value")
+        } else {
+            println("Key $key not found in database")
         }
-        println("Key $key deleted; its value was $value")
     }
-    else {
-        println("Key $key not found in database")
-    }
-
 }
 
 // deletes elements from database
@@ -121,13 +130,18 @@ fun delete(args: List<String>, head: File) {
 
 // gets the value by its key
 fun getSingle(key: Key, head: File): Value? {
-    val filename = "key_$key"
-    val dirPath = getFullDir(head, key)
-    val file = File(dirPath, filename)
-    return if (file.exists()) {
-        file.readText()
-    } else {
+    return if (!checkKey(key)) {
+        println("Key $key is invalid")
         null
+    } else {
+        val filename = "key_$key"
+        val dirPath = getFullDir(head, key)
+        val file = File(dirPath, filename)
+        if (file.exists()) {
+            file.readText()
+        } else {
+            null
+        }
     }
 }
 
@@ -172,8 +186,13 @@ fun getQuery(args: Array<String>): Query {
 // function redirects the query to appropriate function
 fun produceQuery(query: Query, head: File) {
     when (query.queryType) {
-        Add -> add(query.args, head)
-        Delete -> delete(query.args, head)
+        Add -> {
+            val elements = parseArgs(query.args)
+            add(elements, head)
+        }
+        Delete -> {
+            delete(query.args, head)
+        }
         Get -> {
             val values = get(query.args, head)
             println(values.joinToString("\n"))

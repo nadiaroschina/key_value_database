@@ -173,9 +173,9 @@ internal class BigTestsDatabase {
         val head = File("src/test/testdata")
         head.mkdirs()
 
-        val elemList1 = List(1000) { "a${it / 2}" }
+        val elemList1 = List(500) { Element("a$it", "a$it") }
         val keys1 = List(500) { "a$it" }
-        val elemList2 = List(2000) { "b${it / 2}" }
+        val elemList2 = List(1000) { Element("b$it", "b$it") }
         val keys2 = List(1000) { "b$it" }
 
         add(elemList1, head)
@@ -197,9 +197,9 @@ internal class BigTestsDatabase {
         val head = File("src/test/testdata")
         head.mkdirs()
 
-        val elemList1 = List(1000) { "a${it / 2}" }
+        val elemList1 = List(500) { Element("a$it", "a$it") }
         val keys1 = List(500) { "a$it" }
-        val elemList2 = List(2000) { "b${it / 2}" }
+        val elemList2 = List(1000) { Element("b$it", "b$it") }
         val keys2 = List(1000) { "b$it" }
 
         delete(keys1, head)
@@ -223,8 +223,8 @@ internal class BigTestsDatabase {
         val head = File("src/test/testdata")
         head.mkdirs()
 
-        val elemList = List(2000) { "${it / 2}" }
-        val keys = List(1000) { "$it" }
+        val elemList = List(1000) { Element("${it / 2}", "${it / 2}") }
+        val keys = List(1000) { "b$it" }
 
         add(elemList, head)
         delete(keys, head)
