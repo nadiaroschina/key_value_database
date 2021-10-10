@@ -74,7 +74,95 @@ internal class InternalFunctionsTest {
 
 // checking correctness
 internal class SmallTestsDatabase {
-    // TODO
+    @Test
+    fun testAddSingle() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val cake = Element("cake", "flour,eggs,milk")
+        val cake2 = Element("cake", "flour,sugar,cream")
+        val soup = Element("soup", "water,meat,potatoes")
+
+        addSingle(cake, head)
+        assertEquals(getSingle("cake", head), "flour,eggs,milk")
+        assertEquals(getSingle("soup", head), null)
+
+        addSingle(soup, head)
+        assertEquals(getSingle("cake", head), "flour,eggs,milk")
+        assertEquals(getSingle("soup", head), "water,meat,potatoes")
+
+        addSingle(cake2, head)
+        assertEquals(getSingle("cake", head), "flour,sugar,cream")
+        assertEquals(getSingle("soup", head), "water,meat,potatoes")
+
+
+        head.deleteRecursively()
+    }
+
+    @Test
+    fun testDeleteSingle() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val cake = Element("cake", "flour,eggs,milk")
+        val porridge = Element("porridge", "oats,milk")
+
+        assertEquals(getSingle("cake", head), null)
+        assertEquals(getSingle("porridge", head), null)
+
+        addSingle(cake, head)
+        addSingle(porridge, head)
+        assertEquals(getSingle("cake", head), "flour,eggs,milk")
+        assertEquals(getSingle("porridge", head), "oats,milk")
+
+        deleteSingle("porridge", head)
+        assertEquals(getSingle("porridge", head), null)
+        assertEquals(getSingle("cake", head), "flour,eggs,milk")
+
+        deleteSingle("marmalade", head)
+        assertEquals(getSingle("porridge", head), null)
+        assertEquals(getSingle("cake", head), "flour,eggs,milk")
+
+        deleteSingle("cake", head)
+        assertEquals(getSingle("cake", head), null)
+        assertEquals(getSingle("porridge", head), null)
+
+        head.deleteRecursively()
+    }
+
+    @Test
+    fun testSingles() {
+        val head = File("src/test/testdata")
+        head.mkdirs()
+
+        val marmalade = Element("marmalade", "berries,sugar")
+        val marmalade2 = Element("marmalade", "juice,jelly")
+        val porridge = Element("porridge", "oats,milk")
+
+        assertEquals(getSingle("cake", head), null)
+        assertEquals(getSingle("porridge", head), null)
+
+        addSingle(marmalade, head)
+        addSingle(porridge, head)
+
+        clear(head)
+
+        assertEquals(getSingle("cake", head), null)
+        assertEquals(getSingle("porridge", head), null)
+
+        addSingle(marmalade, head)
+        assertEquals(getSingle("marmalade", head), "berries,sugar")
+        assertEquals(getSingle("porridge", head), null)
+
+        addSingle(marmalade2, head)
+        assertEquals(getSingle("marmalade", head), "juice,jelly")
+
+        clear(head)
+        assertEquals(getSingle("marmalade", head), null)
+
+        head.deleteRecursively()
+    }
+
 }
 
 // checking effectiveness
