@@ -62,23 +62,25 @@ fun addSingle(elem: Element, head: File) {
 
     val (key, value) = elem
 
-    val dir = File(getFullDir(head, key))
+    // to avoid file names such as "0" or "1"
+    val filename = "key_$key"
 
+    val dir = File(getFullDir(head, key))
     dir.mkdirs()
 
-    val file = File(dir, key)
+    val file = File(dir, filename)
     if (file.exists()) {
         val oldValue = file.readText()
         if (oldValue == value) {
-            println("Key $key already stores value $value.")
+            println("Key $key already stores value $value")
         } else {
             file.writeText(value)
-            println("Key $key changed its value to $value. Old value was $oldValue.")
+            println("Key $key changed its value to $value. Old value was $oldValue")
         }
     } else {
         file.createNewFile()
         file.writeText(elem.value)
-        println("Key ${elem.key} now has the value ${elem.value}.")
+        println("Key ${elem.key} now has the value ${elem.value}")
     }
 
 }
@@ -93,10 +95,10 @@ fun add(args: List<String>, head: File) {
 fun deleteSingle(key: Key, head: File) {
 
     val dirPath = getFullDir(head, key)
-    var file = File(dirPath, key)
+    val filename = "key_$key"
+    var file = File(dirPath, filename)
 
     if (file.exists()) {
-        println("file exists")
         val value = file.readText()
         file.delete()
         // deleting empty head directories
@@ -104,10 +106,10 @@ fun deleteSingle(key: Key, head: File) {
             file = file.parentFile
             file.delete()
         }
-        println("Key $key deleted; its value was $value.")
+        println("Key $key deleted; its value was $value")
     }
     else {
-        println("Key $key not found in database.")
+        println("Key $key not found in database")
     }
 
 }
@@ -119,8 +121,9 @@ fun delete(args: List<String>, head: File) {
 
 // gets the value by its key
 fun getSingle(key: Key, head: File): Value? {
+    val filename = "key_$key"
     val dirPath = getFullDir(head, key)
-    val file = File(dirPath, key)
+    val file = File(dirPath, filename)
     return if (file.exists()) {
         file.readText()
     } else {
