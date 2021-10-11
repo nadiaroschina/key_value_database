@@ -51,7 +51,7 @@ fun checkKey(key: Key): Boolean {
 // parses arguments into elements with key and value
 fun parseArgs(args: List<String>): List<Element> {
     if (args.size % 2 == 1) {
-        throw IllegalArgumentException("Invalid number of arguments")
+        throw InvalidArguments(args)
     }
     val elements = mutableListOf<Element>()
     for (ind in args.indices step 2) {
@@ -167,8 +167,7 @@ data class Query(val queryType: QueryType, val args: List<String>)
 // function checks the correctness of query type and returns the query
 fun getQuery(args: Array<String>): Query {
     if (args.isEmpty()) {
-        // TODO remove exception throw
-        throw IllegalArgumentException("Empty query")
+        throw EmptyQuery()
     }
 
     val queryName = args[0]
@@ -179,8 +178,7 @@ fun getQuery(args: Array<String>): Query {
             return Query(queryType, queryArgs)
         }
     }
-    // TODO remove exception throw
-    throw IllegalArgumentException("Unsupported query: $queryName")
+    throw UnsupportedQuery(queryName)
 }
 
 // function redirects the query to appropriate function

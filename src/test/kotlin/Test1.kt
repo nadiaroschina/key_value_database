@@ -15,10 +15,10 @@ internal class InternalFunctionsTest {
         val expected2 = Query(QueryType.Clear, emptyList())
         assertEquals(expected2, getQuery(args2))
 
-        assertThrows<IllegalArgumentException> { getQuery(emptyArray()) }
-        assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin")) }
-        assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin elem")) }
-        assertThrows<IllegalArgumentException> { getQuery(arrayOf("ruin elem1 elem2")) }
+        assertThrows<EmptyQuery> { getQuery(emptyArray()) }
+        assertThrows<UnsupportedQuery> { getQuery(arrayOf("ruin")) }
+        assertThrows<UnsupportedQuery> { getQuery(arrayOf("ruin elem")) }
+        assertThrows<UnsupportedQuery> { getQuery(arrayOf("ruin elem1 elem2")) }
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class InternalFunctionsTest {
     @Test
     fun testParseArgs() {
         val args1 = listOf("1", "2", "3", "4", "5")
-        assertThrows<IllegalArgumentException> { parseArgs(args1) }
+        assertThrows<InvalidArguments> { parseArgs(args1) }
 
         val args2 = listOf("a", "b", "c", "d", "e", "f")
         val expected = listOf(Element("a", "b"), Element("c", "d"), Element("e", "f"))
@@ -56,7 +56,6 @@ internal class InternalFunctionsTest {
 
         val dirmilk1 = getFullDir(head, "milk")
         val dirmilk2 = getFullDir(head, "milk")
-        println(dirmilk1)
         assertTrue { dirmilk1.startsWith("src\\test\\testdata") or dirmilk1.startsWith("src/test/testdata") }
 
         val dirMilk = getFullDir(head, "Milk")
